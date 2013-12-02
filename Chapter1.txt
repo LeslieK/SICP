@@ -1,0 +1,427 @@
+;#lang racket
+#lang planet neil/sicp
+;; ex1-10
+; (define (A x y)
+;   (cond ((= y 0) 0)
+;         ((= x 0) (* 2 y))
+;         ((= y 1) 2)
+;         (else (A (- x 1)
+;                  (A x (- y 1))))))
+; (A 1 10)
+; ;; 2 ** 10 = 2014
+; (A 2 4)
+; ;; 2 ** 16 = 65536
+; (A 3 3)
+; ;; 2 ** 16
+; 
+; (define (f n) (A 0 n))
+; (f 1)
+; (f 2)
+; (f 3)
+; ;; (f n) = 2 * n
+; 
+; (define (g n) (A 1 n))
+; (g 1)
+; (g 2)
+; (g 3)
+; (g 10)
+; ;; 2 ** 10
+; 
+; (define (h n) (A 2 n))
+; (h 1)
+; (h 2)
+; (h 3)
+; (h 4)
+
+;; 
+
+;; (A 2 n) -> (A 1 (A 2 (- n 1))) -> 2 ** (A 2 (- n 1))) -> 2 ** 2 ** (A 2 (- n 2))
+;; 2 ** 2 ** 2 ** ... n times
+
+
+;; Fibonacci - iterative
+;; constant in space
+;; linear in time
+(define (fib2 n)
+  (fib-iter2 1 0 n))
+
+(define (fib-iter2 a b count)
+  (if (= count 0)
+      b
+      (fib-iter2 (+ a b) a (- count 1))))
+
+;; counting change
+(define (first-denomination kinds-of-coins)
+  (cond ((= kinds-of-coins 1) 1)
+        ((= kinds-of-coins 2) 5)
+        ((= kinds-of-coins 3) 10)
+        ((= kinds-of-coins 4) 25)
+        ((= kinds-of-coins 5) 50)))
+
+(define (count-change amount)
+  (cc amount 5))
+
+(define (cc amount kinds-of-coins)
+  (cond ((= amount 0) 1)
+        ((or (< amount 0) (= kinds-of-coins 0)) 0)
+        (else (+ (cc amount (- kinds-of-coins 1))
+                 (cc (- amount (first-denomination kinds-of-coins)) kinds-of-coins)))))
+
+;; ex1-11
+;; f(n) = n if n<3 and f(n) = f(n - 1) + 2f(n - 2) + 3f(n - 3) if n> 3
+
+(define (f-rec n)
+  (if (< n 3)
+      n
+      (+ (f-rec (- n 1)) (* 2 (f-rec (- n 2))) (* 3 (f-rec (- n 3))))))
+
+(define (f-iter-helper a b c count)
+  (if (= count 0)
+      c
+      (f-iter-helper (+ a (* 2 b) (* 3 c)) a b (- count 1))))
+
+(define (f-iter n)
+  (f-iter-helper 2 1 0 n))
+
+;; ex1-12
+;; Write a procedure that computes elements of Pascal's triangle by means of a recursive process.
+
+(define (pascal j n)
+  (cond ((= j 0) 1)
+        ((= j n) 1)
+        (else (+ (pascal (- j 1) n) (pascal j (- n 1))))))
+
+;; ex1-14
+;; space = depth of tree = longest path = amount
+;; time = # nodes = exponential
+;; add 1 to amount (add 1 node) => multiplies time by 2; increases space by 1
+
+;; ex1-15
+;; calculation of the sin of an angle in radians
+(define (cube x) (* x x x))
+(define (p x) (- (* 3 x) (* 4 (cube x))))
+(define (sine angle)
+  (if (not (> (abs angle) 0.1))
+      angle
+      (p (sine (/ angle 3.0)))))
+
+;; how many times is procedure p applied when (sine 12.15) is evaluated? 5 times
+;; 12.15 / 3 = 4.05
+;; 4.05 / 3 = 1.35
+;; 1.35 / 3 = .45
+;; .45 / 3 = .15
+;; .15 /3 = .05
+;; order of growth of space: constant
+;; order of growth in time: log base 3
+
+;; 1.2.4 Exponentiation
+;; linear recursion: 
+;; linear in time
+;; linear in space
+(define (expt b n)
+  (if (= n 0)
+      1
+      (* b (expt b (- n 1)))))
+
+;; iterative recursion: 
+;; linear in time
+;; constant in space
+(define (expt-iter-helper a b count)
+  (if (= count 0)
+      a
+      (expt-iter-helper (* a b) b (- count 1))))
+
+(define (expt-iter b n)
+  (expt-iter-helper 1 b n))
+
+;; successive squaring
+;; logarithmic in time: log base 2
+;; logarithmic in space: log base 2
+(define (is-even? n)
+  (if (= (remainder n 2) 0)
+      #t
+      #f))
+
+(define (square x)
+  (* x x))
+
+(define (fast-expt b n)
+  (cond ((= n 0) 1)
+        ((is-even? n) (square (fast-expt b (/ n 2))))
+        (else (* b (fast-expt b (- n 1))))))
+
+;; ex1-16
+;; iterative exponentiation process
+;; logarithmic in time
+;; constant in space
+(define (fast-expt-iter-helper a b count)
+  (cond ((= count 0) a)
+        ((is-even? count) (fast-expt-iter-helper a (square b) (/ count 2)))
+        (else (fast-expt-iter-helper (* a b) b (- count 1)))))
+
+(define (fast-expt-iter b n)
+  (fast-expt-iter-helper 1 b n))
+
+;; ex1-17
+;; integer multiplication by repeated addition
+;; linear in space and time
+(define (* a b)
+  (if (= b 0)
+      0
+      (+ a (* a (- b 1)))))
+
+(define (double n)
+  (+ n n))
+
+(define (halve n)
+  (/ n 2))
+
+;; logarithmic in time
+;; logarithmic in space
+(define (fast-mult a b)
+  (cond ((= b 0) 0)
+      ((is-even? b) (fast-mult (double a) (halve b)))
+      (else (+ a (fast-mult a (- b 1))))))
+
+;;(fast-mult 55 63) => 3465
+      
+;; ex1-18
+;; write a procedure that generates an iterative process for multiplying 2 integers
+;; in terms of adding, doubling, and halving
+;; constant space
+;; logarithmic in time
+(define (fast-mult-helper a b count)
+  (cond ((= count 0) a)
+        ((is-even? count) (fast-mult-helper a (double b) (halve count)))
+        (else (fast-mult-helper (+ a b) b (- count 1)))))
+
+(define (fast-mult-iter b n)
+  (fast-mult-helper 0 b n))
+
+;;(fast-mult-iter 1000 1) => 1000
+;;(fast-mult-iter 1000 1000) => 1000000
+;;(fast-mult-iter 55 63) => 3465
+
+;; ex1-19
+;; another look at fib-iter
+;; Tp'q' = Tpq * Tpq
+;; solve for p', q' in terms of p and q
+;; constant in space
+;; logarithmic in time
+(define (fib n)
+  (fib-iter 1 0 0 1 n))
+
+(define (fib-iter a b p q count)
+  (cond ((= count 0) b)
+        ((is-even? count)
+         (fib-iter a
+                   b
+                   (+ (square p) (square q)) ;; p'
+                   (+ (* 2 (* p q)) (square q))  ;; q'
+                   (/ count 2)))
+        (else (fib-iter (+ (* b q) (* a q) (* a p))
+                        (+ (* b p) (* a q))
+                        p
+                        q
+                        (- count 1)))))
+
+                   
+;;(fib 40) something is wrong with this fib-iter procedure
+;; (fib2 40) => 102334155
+
+;; ex1-20
+;; GCD: It is possible to show that starting with any two positive integers and performing repeated reductions
+;; will always eventually produce a pair where the second number is 0
+;; Euclid's algorithm
+;; constant space
+;; logarithmic in time
+(define (gcd a b)
+  (if (= b 0)
+      a
+      (gcd b (remainder a b))))
+
+;; normal-order evaluation: fully expand and then reduce
+;; no remainder operations are performed
+;(gcd 206 40)
+; (if (= 40 0)
+;     206
+;     (gcd 40 (remainder 206 40)))
+; 
+; (if (= (remainder 206 40) 0)
+;     40
+;     (gcd (remainder 206 40) (remainder 40 (remainder 206 40))))
+; 
+; (if (= (remainder 40 (remainder 206 40)) 0)
+;     (remainder 206 40)
+;     (gcd (remainder 40 (remainder 206 40)) (remainder (remainder 206 40) (remainder 40 (remainder 206 40)))))
+
+;; 
+;; applicative-order: evaluate the args and then apply
+;; 2 remainder operations performed
+;(gcd 206 40)
+;(gcd 40 (remainder 206 40))
+;(gcd 40 5)
+;(gcd 40 (remainder 40 5))
+;(gcd 40 0)
+;; 40
+  
+;; Testing for Primality
+;; number of steps grows as sqrt(n)
+;; divisor <= sqrt(n)
+(define (smallest-divisor n)
+  (find-divisor n 2))
+
+(define (next n)
+  (if (= n 2)
+      3
+      (+ n 2)))
+
+(define (find-divisor n test-divisor)
+  (cond ((> (square test-divisor) n) n)
+        ((divides? test-divisor n) test-divisor)
+        (else (find-divisor n (next test-divisor)))))
+  
+(define (divides? a b)
+  (= (remainder b a) 0))
+  
+(define (prime? n)
+  (= (smallest-divisor n) n))
+  
+;; Fermat's Test
+;; n is probably prime if a**n := a mod n ( a < n )
+;; time grows logarithmically with exp
+;; space grows logarithmically with exp
+(define (expmod base exp m)
+  (cond ((= exp 0) 1)
+        ((is-even? exp)
+         (remainder (square (expmod base (/ exp 2) m)) m))
+        (else 
+         (remainder (* base (expmod base (- exp 1) m)) m))))
+
+;; time grows logarithmically in n
+(define (fermat-test n)
+  (define (try-it a)
+    (= (expmod a n n) a))
+  (try-it (+ 1 (random (- n 1)))))
+
+(define (fast-prime? n times)
+  (cond ((= times 0) true)
+        ((fermat-test n)
+            (fast-prime? n (- times 1)))
+        (else false)))
+
+;; ex1-21
+;(smallest-divisor 199) ;; 199
+;(smallest-divisor 1999) ;; 1999
+;(smallest-divisor 19999) ;; 7
+
+;; ex1-22
+;; (runtime) => integer that specifies amt of time system has been running
+; (define (timed-prime-test n)
+;   (newline)
+;   (display n)
+;   (start-prime-test n (runtime)))
+; 
+; (define (start-prime-test n start-time)
+;   (if (fast-prime? n 3) ;; replaced (prime? n) with (fast-prime? n times)
+;       (report-prime (- (runtime) start-time))))
+; 
+; (define (report-prime elapsed-time)
+;   (display " *** ")
+;   (display elapsed-time))
+
+
+;; check primality for consecutive odd integers in a range
+;; look at times of 3 smallest primes
+;; use smallest-divisor procedure
+
+ ; (define (search-for-primes lower upper)
+;    (define (iter lower)
+;     (cond ((> lower upper) (display "\nDone\n"))
+;           (else (timed-prime-test lower)
+;                 (iter (+ lower 2)))))
+;    
+;    (if (is-even? lower)
+;        (iter (+ 1 lower))
+;        (iter (+ 2 lower))))
+
+        
+;; (search-for-primes 1000 1500)
+;; (search-for-primes 10000 10500)
+;; (search-for-primes 100000 100500)
+;; (search-for-primes 1000000 1000500)
+
+ ;; ex1-23
+ ;; use smallest-divisor procedure with (next test-divisor)
+;; (next 2)
+;; (next 3)
+;; (next (next (next (next 2))))
+ 
+ ;; ex1-24
+ ;; user faster-prime? (Fermat's test)
+ ;;(search-for-primes 1000 1500)
+ ;;(search-for-primes 1000 1050)
+ ;;(search-for-primes 10000 10050)
+ ;;(search-for-primes 100000 100050)
+ ;;(search-for-primes 1000000 1000050)
+ 
+ ;; ex1-25
+ ;; Alyssa B. Hacker is not doing mod arithmetic until the end. Her calc won't work.
+ ;; (define (expmod base exp m)
+ ;;   (remainder (fast-expt base exp) m))
+ ;; if n = 1,000,000 => square(square(a)) ... (log n) times => squaring a 20 times => a ** 40 => try 2 ** 40!
+ 
+ ;; ex1-26
+ ;; having 2 recursive calls causes the growth to be exponential, 2 ** (order of growth of each call)
+ ;; 2 ** (log n) = n
+ 
+ ;; ex1-27
+ ;; demonstrate that Carmichael numbers really do fool the Fermat test
+ (define (congruent-test n)
+   (define (iter a)
+     (if (= a (- n 1))
+         true
+         (if (= (expmod a n n) a) 
+             (iter (+ 1 a))
+             false)))
+   (iter 1))
+ 
+; (congruent-test 561)
+; (congruent-test 1105) 
+; (congruent-test 1729) 
+; (congruent-test 2465) 
+; (congruent-test 2821) 
+; (congruent-test 6601)
+ 
+ ;; ex1-28
+ ;; Miller-Rabin Test
+ ;; requires #lang racket
+ (define (expmod_mr base exp m)
+  (cond ((= exp 0) 1)
+        ((even? exp) 
+         (define exp/2-result (expmod_mr base (/ exp 2) m))
+         (define exp-result (remainder (square exp/2-result) m))
+         (cond ((and (not (= exp/2-result 1)) 
+                     (not (= exp/2-result (- m 1)))
+                     (= exp-result 1)) 0)
+               (else exp-result)))
+        (else (remainder (* base (expmod_mr base (- exp 1) m)) m))))
+ 
+ (define (miller-rabin-test n)
+   (define (try-it a)
+     (= (expmod_mr a (- n 1) n) 1))
+   (try-it (+ 1 (random (- n 1)))))
+ 
+;(miller-rabin-test 561)
+;(miller-rabin-test 1105) 
+;(miller-rabin-test 1729) 
+;(miller-rabin-test 2465) 
+;(miller-rabin-test 2821) 
+;(miller-rabin-test 6601)
+;(miller-rabin-test 2)
+;(miller-rabin-test 1000003)
+;(miller-rabin-test 1000017)
+
+ 
+    
+   
