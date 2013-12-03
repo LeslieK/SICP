@@ -1,6 +1,6 @@
 SICP (MIT's Structure and Interpretion of Computer Programs)
 
-1. I am most proud of solving the Eight Queens Problem.
+1. I am most proud of solving the Eight Queens Problem. And the Symbolic Differentiation problem (without unnecessary parens.)
 2. I finally have more than a superficial understanding of data abstraction. I'm starting to feel it in my gut.
 3. Learned TONS from working on SICP during Hacker School. A subset of what I learned:
 scheme (as much as presented through chapter 2)
