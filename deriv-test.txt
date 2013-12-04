@@ -1,0 +1,77 @@
+#lang racket
+(require rackunit
+         "Chapter2.3.rkt")
+
+(check-equal? (multiplicand '(* 1 2 a 4 5)) '(* 2 a 4 5))
+(check-equal? (deriv '(* (* x y) (+ x 3)) 'x) '(+ (* x y) (* y (+ x 3))))
+
+;make-sum-in-2
+(check-equal? (make-sum-in-2 0 2 'x 0 5 0 'y 0 0 'q 0) '(2 + x + 5 + y + q))
+(check-equal? (make-sum-in-2 1 2 3 4 5 'y 'z 1 2 3) '(15 + y + z + 1 + 2 + 3))
+(check-equal? (make-sum-in-2 'x 'y 'z 'r 's 't) '(x + y + z + r + s + t))
+
+;make-product-in-2
+(check-equal? (make-product-in-2 2 3 4 5 'b 'c 'x 10) '(120 * b * c * x * 10))
+(check-equal? (make-product-in-2 5 4 3 2 'x 'y 1 'z 's 1 't) '(120 * x * y * z * s * t))
+(check-equal? (make-product-in-2 5 4 3 2 'x 'y 0 'z 's 1 't) 0)
+(check-equal? (make-product-in-2 5 4 'x 2 'x 'y 3 'z 's 1 't) '(20 * x * 2 * x * y * 3 * z * s * t))
+
+(check-equal? (make-exponentiation-in 'x 6) '(x ** 6))
+(check-equal? (base-in '(x ** 6)) 'x)
+(check-equal? (exponent-in '(x ** 6)) 6)
+(check-equal? (exponent-in '(x ** (a + b))) '(a + b))
+
+; test sum?-in-2
+(check-equal? (sum?-in-2 (make-sum-in-2 1 2 3 4 5 'y 'z 1 2 3)) '(+ y + z + 1 + 2 + 3))
+(check-equal? (sum?-in-2 '(x * y * z ** 33)) #f)
+(check-equal? (sum?-in-2 '(x * y + z ** 33)) '(+ z ** 33))
+(check-equal? (sum?-in-2 '(x * y ** z ** 33 + 1)) '(+ 1))
+(check-equal? (sum?-in-2 '(3 * x ** 2 + 2 * x ** 2 + x * y + 22 * x + 50)) '(+ 2 * x ** 2 + x * y + 22 * x + 50))
+
+; test product?-in-2
+(check-equal? (product?-in-2 '(24 * x)) '(* x))
+(check-equal? (product?-in-2 '(24 + x * 3 * 2 ** 3)) #f "memq '* p")
+(check-equal? (product?-in-2 '(24 ** x + 10 ** z)) #f)
+(check-equal? (product?-in-2 '(24 ** x * 10 ** z)) '( * 10 ** z))
+(check-equal? (product?-in-2 '(3 * x ** 2 + 2 * x ** 2 + x * y + 22 * x + 50)) #f)
+
+; test exponentiation?-in-2
+(check-equal? (exponentiation?-in '(3 * x ** 2 + 2 * x ** 2 + x * y + 22 * x + 50)) #f)
+(check-equal? (exponentiation?-in '(x ** 2)) '(** 2))
+(check-equal? (exponentiation?-in '(x ** 2 + 1)) #f)
+(check-equal? (exponentiation?-in '(x ** 2 * 1)) #f)
+
+
+; multiplier-in-2
+(check-equal? (multiplier-in-2 '(x ** 2 * 2 * x ** 2 * x * y ** 22 * x * 50)) '(x ** 2))
+(check-equal? (multiplier-in-2 '(2 * x ** 2)) 2)
+(check-equal? (multiplier-in-2 '(x * y)) 'x)
+
+; multiplicand-in-2
+(check-equal? (multiplicand-in-2 '(x ** 2 * 2 * x ** 2 * x * y ** 22 * x * 50)) '(2 * x ** 2 * x * y ** 22 * x * 50))
+(check-equal? (multiplicand-in-2 '(3 * x ** 2 + 2 * x ** 2 + x * y + 22 * x + 50)) '(x ** 2 + 2 * x ** 2 + x * y + 22 * x + 50))
+(check-equal? (multiplicand-in-2 '(2 * x ** 2 + x * y + 22 * x + 50)) '(x ** 2 + x * y + 22 * x + 50))
+(check-equal? (multiplicand-in-2 '(x * y + 22 * x + 50)) '(y + 22 * x + 50)) 
+
+; addend-in-2
+(check-equal? (addend-in-2 '(x ** 2 * 2 * x ** 2 * x + y ** 22 * x * 50)) '(x ** 2 * 2 * x ** 2 * x))
+(check-equal? (addend-in-2 '(x ** 2 + 2 * x ** 2 + x * y + 22 * x + 50)) '(x ** 2))
+(check-equal? (addend-in-2 '(x ** 2 + x * y + 22 * x + 50)) '(x ** 2))
+(check-equal? (addend-in-2 '(3 * x ** 2 + 2 * x ** 2 + x * y + 22 * x + 50)) '(3 * x ** 2))
+(check-equal? (addend-in-2 '(x * y + 22 * x + 50)) '(x * y))
+
+; augend-in-2
+(check-equal? (augend-in-2 '(x ** 2 * 2 * x ** 2 * x + y ** 22 * x * 50)) '(y ** 22 * x * 50))
+(check-equal? (augend-in-2 '(x ** 2 + 2 * x ** 2 + x * y + 22 * x + 50)) '(2 * x ** 2 + x * y + 22 * x + 50))
+(check-equal? (augend-in-2 '(x ** 2 + x * y + 22 * x + 50)) '(x * y + 22 * x + 50))
+
+; deriv-2
+(check-equal? (deriv-2 '(x * y * (x + 3)) 'x) '(x * y + (y * (x + 3))))
+(check-equal? (deriv-2 '(5 * x + 6 * x * y + 10) 'x) '(5 + (6 * y)))
+(check-equal? (deriv-2 '(3 * x ** 2 + 2 * x ** 2 + x * y + 22 * x + 50) 'x) '(3 * (2 * x) + (2 * (2 * x) + (y + 22))))
+(check-equal? (deriv-2 '(3 * x ** 2) 'x) '(3 * (2 * x)))
+(check-equal? (deriv-2 '(2 * x ** 2) 'x) '(2 * (2 * x)))
+(check-equal? (deriv-2 '(x * y) 'x) 'y)
+(check-equal? (deriv-2 '(x + 50) 'x) 1)
+              
+         

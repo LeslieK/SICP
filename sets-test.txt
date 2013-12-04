@@ -1,0 +1,29 @@
+#lang racket
+(require rackunit
+         "Chapter2.3.3.rkt")
+
+(check-equal? (union-set '(1 2 3 4) '(5 6 7 8)) '(1 2 3 4 5 6 7 8))
+(check-equal? (union-set '() '(5 6 7 8)) '(5 6 7 8))
+
+; ex 2.60 set representation: unordered list w duplicates
+
+(check-equal? (adjoin-set-d '9 '( 1 1 2 3)) '(9 1 1 2 3))
+(check-equal? (adjoin-set-d '() '( 1 1 2 3)) '(1 1 2 3))
+
+(check-equal? (union-set-d '( 1 1 2 3)'(5 6 7 3 3 4)) '(1 1 2 3 5 6 7 3 3 4))
+
+(check-equal? (intersection-set '( 1 1 2 3) '(5 6 7 3 3 4)) '(3))
+
+; ex. 2.61 set representation: sorted list; w/o duplicates
+(check-equal? (adjoin-set-s 1 '(1 2 3 4)) '(1 2 3 4))
+(check-equal? (adjoin-set-s 1 '(5 6 7 8)) '(1 5 6 7 8))
+(check-equal? (adjoin-set-s 8 '(5 6 7 8)) '(5 6 7 8))
+(check-equal? (adjoin-set-s 8 '(5 6 7 9 10)) '(5 6 7 8 9 10))
+(check-equal? (adjoin-set-s '() '(1 2 3 4)) '(1 2 3 4))
+(check-equal? (adjoin-set-s 1 '()) '(1))
+
+; Exercise 2.62. Give a O(n) implementation of union-set for sets represented as ordered lists.
+(check-equal? (union-set-s '(2 3 5 7 9) '(0 2 5 23 25)) '(0 2 3 5 7 9 23 25))
+(check-equal? (union-set-s '() '(2 3 5 7 9)) '(2 3 5 7 9))
+
+; ex 2.63 part a: Do the two procedures produce the same result for every tree?
