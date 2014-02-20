@@ -42,7 +42,7 @@
 (define (union-set-d s1 s2)
   (cond ((null? s1) s2)
         ((null? s2) s1)
-        ((adjoin-set-d (car s1) (union-set-d (cdr s1) s2)))))
+        (append s1 s2)))
 
 ; intersection-of-set? => no change
 
@@ -160,7 +160,7 @@
   (car (partial-tree elements (length elements))))
 
 (define (partial-tree elts n)
-  (display "partial-tree ") (display elts) (display " ") (display n) (newline)
+  ;(display "partial-tree ") (display elts) (display " ") (display n) (newline)
   (if (= n 0)
       (cons '() elts) ; no partial-tree is constructed
       (let ((left-size (quotient (- n 1) 2)))
@@ -168,13 +168,11 @@
               (let ((left-tree (car left-result))
                     (non-left-elts (cdr left-result))
                     (right-size (- n (+ left-size 1))))
-                    (display "this-entry is ") (display (car non-left-elts)) (newline)
                 (let ((this-entry (car non-left-elts))
                       (right-result (partial-tree (cdr non-left-elts) right-size)))
                           (newline)
                   (let ((right-tree (car right-result))
                         (remaining-elts (cdr right-result)))
-                    (display "subtree is ") (display this-entry) (display left-tree) (display right-tree) (newline)
                     (cons (make-tree this-entry left-tree right-tree) remaining-elts))))))))
 
  (define tree-list (tree->list2 tb))
@@ -196,7 +194,14 @@
       
 ; 2.65 give O(n) implementations of union-set and intersection-set
 ; for sets implemented as (balanced) binary trees
- 
+
+ ; convert each set to a sorted list then union then convert back to a tree
+(define (union-set-t-2 set1 set2)
+  (let ((set1-list (tree->list2 set1))
+         (set2-list (tree->list2 set2)))
+     (list->tree (union-set-s set1-list set2-list))))
+
+; not as good
 (define (union-set-t set1 set2)
   (cond ((null? set1) (list->tree (tree->list2 set2)))
         ((null? set2) (list->tree (tree->list2 set1)))
@@ -217,6 +222,13 @@
                         (s2 (adjoin-set-t e2 set1)))
                     (union-set-t s1 s2))))))))
 
+; convert each set to a sorted list then intersect lists then convert back to a tree
+ (define (intersection-set-t-2 set1 set2)
+   (let ((set1-list (tree->list2 set1))
+         (set2-list (tree->list2 set2)))
+     (list->tree (intersection-set-s set1-list set2-list))))
+ 
+; not as good 
 (define (intersection-set-t set1 set2)
   (if (or (null? set1) (null? set2)) 
       '()
@@ -238,9 +250,11 @@
 ta
 tc
 ;(list->tree (tree->list2 tc))
-(union-set-t ta tc)
+;(union-set-t ta tc)
+(union-set-t-2 ta tc)
 ; '(19 (16 (1 () (3 () ())) (17 () (18 () ()))) (27 (20 () (26 () ())) (30 (28 () ()) (31 () ()))))
-(intersection-set-t tc td)
+;(intersection-set-t tc td)
+(intersection-set-t-2 tc td)
 ; '(18 (16 () (17 () ())) (19 () (20 () ())))
 
 ; Exercise 2.66. Implement the lookup procedure for the case where 
@@ -270,7 +284,7 @@ tc
 (define set-of-records (make-tree rec20 rec21 rec22))
 
 ;(lookup 20 set-of-records)
-  
+
 
 
           
