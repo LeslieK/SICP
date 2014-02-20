@@ -53,7 +53,7 @@
          (reset-deque! deque))    
         (else
          (set-front-ptr-top! deque (cdr (front-ptr-top deque))) ; front-ptr-top -> next
-         ;(set-cdr! front-ptr-bot '()) ; prevent loitering ?
+         (set-cdr! (front-ptr-bot deque) '()) ; prevent loitering ?
          (set-front-ptr-bot! deque (get-link-to-bot (front-ptr-top deque))) ; front-ptr-bot -> prev
          (set-cdr! (front-ptr-bot deque) (front-ptr-top deque)) ; bot -> top
          (decr deque)
@@ -66,7 +66,7 @@
          (reset-deque! deque))
         (else
          (set-rear-ptr-bot! deque (cdr (rear-ptr-bot deque))) ; rear-ptr-bot -> next
-         ;(set-cdr! rear-ptr-top '()) ; prevent loitering ?
+         (set-cdr! (rear-ptr-top deque) '()) ; prevent loitering ?
          (set-rear-ptr-top! deque (get-link-to-top (rear-ptr-bot deque))) ; rear-ptr-top -> prev
          (set-cdr! (rear-ptr-top deque) (rear-ptr-bot deque)) ; top -> bot
          (decr deque)
